@@ -1,12 +1,83 @@
+<script setup>
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { isValidPhoneNumber, parsePhoneNumber } from "libphonenumber-js";
+import { register } from "../api/api";
+
+const firstName = ref("");
+const lastName = ref("");
+const phoneNumber = ref("");
+const password = ref("");
+
+const formError = ref("");
+
+const router = useRouter();
+
+const isFormDataValid = computed(() => {
+  return (
+    phoneNumber &&
+    phoneNumber.value.trim() &&
+    password &&
+    firstName &&
+    firstName.value.trim() &&
+    lastName &&
+    lastName.value.trim()
+  );
+});
+
+async function doRegister() {
+  formError.value = "";
+  if (!isFormDataValid) {
+    formError.value = "Missing information";
+    return;
+  }
+  if (!isValidPhoneNumber(phoneNumber.value.trim(), "UG")) {
+    formError.value = "Invalid phone number";
+    return;
+  }
+  try {
+    await register(
+      firstName.value.trim(),
+      lastName.value.trim(),
+      parsePhoneNumber(phoneNumber.value.trim(), "UG").format("E.164"),
+      password.value
+    );
+    // router.push({
+    //   name: "profile",
+    //   params: { phoneNumber: phoneNumber.value.trim() },
+    // });
+    router.push({ name: "login", params: { isFromRegistration: true } });
+  } catch (error) {
+    formError.value = error.message;
+  }
+}
+</script>
+
 <template>
-  <div>
+  <div id="form-container">
     <form>
-      <input type="text" size="1" placeholder="First Name" />
-      <input type="text" size="1" placeholder="Last Name" />
-      <input type="tel" size="1" placeholder="Phone Number" />
-      <input type="password" size="1" placeholder="Password" />
-      <button type="submit">Register</button>
-      <p>
+      <div id="formError" v-if="formError">{{ formError }}</div>
+      <input
+        type="text"
+        size="1"
+        placeholder="First Name"
+        v-model="firstName"
+      />
+      <input type="text" size="1" placeholder="Last Name" v-model="lastName" />
+      <input
+        type="tel"
+        size="1"
+        placeholder="Phone Number"
+        v-model="phoneNumber"
+      />
+      <input
+        type="password"
+        size="1"
+        placeholder="Password"
+        v-model="password"
+      />
+      <button @click.prevent="doRegister" type="submit">Register</button>
+      <p id="login-option">
         Already have an account? <router-link to="/login">Log in</router-link>
       </p>
     </form>
@@ -14,7 +85,7 @@
 </template>
 
 <style scoped>
-div {
+#form-container {
   display: flex;
   justify-content: center;
   padding: 20px;
@@ -45,8 +116,14 @@ button {
   color: white;
 }
 
-p {
-    align-self: flex-end;
-    font-size: small;
+#login-option {
+  align-self: flex-end;
+  font-size: small;
+}
+
+#formError {
+  color: white;
+  background-color: red;
+  padding: 10px;
 }
 </style>

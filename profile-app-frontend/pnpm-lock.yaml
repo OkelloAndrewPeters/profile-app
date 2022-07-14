@@ -3,12 +3,14 @@ lockfileVersion: 5.4
 specifiers:
   '@vitejs/plugin-vue': ^2.3.3
   axios: ^0.27.2
+  libphonenumber-js: ^1.10.8
   vite: ^2.9.9
   vue: ^3.2.25
   vue-router: '4'
 
 dependencies:
   axios: 0.27.2
+  libphonenumber-js: 1.10.8
   vue: 3.2.37
   vue-router: 4.1.2_vue@3.2.37
 
@@ -406,6 +408,10 @@ packages:
     dependencies:
       has: 1.0.3
     dev: true
+
+  /libphonenumber-js/1.10.8:
+    resolution: {integrity: sha512-MGgHrKRGE7sg7y0DikHybRDgTXcYv4HL+WwhDm5UAiChCNb5tcy5OEaU8XTTt5bDBwhZGCJNxoGMVBpZ4RfhIg==}
+    dev: false
 
   /magic-string/0.25.9:
     resolution: {integrity: sha512-RmF0AsMzgt25qzqqLc1+MbHmhdx0ojF2Fvs4XnOqz2ZOBXzzkEwc/dJQZCYHAn7v1jbVOjAZfK8msRn4BxO4VQ==}

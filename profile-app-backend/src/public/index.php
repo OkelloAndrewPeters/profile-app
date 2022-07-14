@@ -34,6 +34,14 @@ $app->add(function (Request $request, Response $response, callable $next) {
     return $next($request, $response);
 });
 
+$app->add(function ($req, $res, $next) {
+    $response = $next($req, $res);
+    return $response
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+});
+
 $app->get('/hello/{name}', function (Request $request, Response $response, array $args) {
     $name = $args['name'];
     $response->getBody()->write("Hello, $name");
@@ -48,7 +56,7 @@ $app->post('/register', function (Request $request, Response $response) {
         unset($body['password']);
         return $response->withJson($body);
     }
-    return $response->withStatus(400)->withJson(['message' => 'Missing data']);
+    return $response->withStatus(400)->withJson(['error' => 'Missing data']);
 });
 
 $app->post('/login', function (Request $request, Response $response) {
@@ -57,7 +65,7 @@ $app->post('/login', function (Request $request, Response $response) {
     if (isset($body['phoneNumber']) && isset($body['password']) && !empty(trim($body['phoneNumber'])) && !empty($body['password'])) {
         $user = getUser(trim($body['phoneNumber']));
         if (empty($user) || !password_verify($body['password'], $user['password_hash'])) {
-            return $response->withStatus(400)->withJson(['message' => 'Invalid phone number or username']);
+            return $response->withStatus(400)->withJson(['error' => 'Invalid phone number or password']);
         }
         unset($user['password_hash']);
         unset($user['first_name']);
@@ -68,19 +76,20 @@ $app->post('/login', function (Request $request, Response $response) {
         $user['exp'] = $expirationTime;
         return $response->withJson(['token' => JWT::encode($user, $key, "HS256")]);
     }
-    return $response->withStatus(400)->withJson(['message' => 'Missing data']);
+    return $response->withStatus(400)->withJson(['error' => 'Missing data']);
 });
 
-$app->get('/profile-data/{phoneNumber}', function (Request $request, Response $response, array $args) {
+$app->post('/profile-data', function (Request $request, Response $response, array $args) {
     global $key;
     $body = $request->getParsedBody();
-    if (!empty($body['token']) && !empty($args['phoneNumber'])) {
+    $phoneNumber = trim($body['phoneNumber']);
+    if (!empty($body['token']) && !empty($phoneNumber) && !empty(trim($phoneNumber))) {
         try {
             $decoded = JWT::decode($body['token'], new Key($key, 'HS256'));
             $decoded = (array) $decoded;
-            if($decoded['phone_number'] == $args['phoneNumber']) {
-                $user = getUser($args['phoneNumber']);
-                if(empty($user)) {
+            if ($decoded['phone_number'] == $phoneNumber) {
+                $user = getUser($phoneNumber);
+                if (empty($user)) {
                     return $response->withStatus(404)->withJson(['error' => 'No such profile']);
                 }
                 unset($user['password_hash']);
@@ -91,7 +100,7 @@ $app->get('/profile-data/{phoneNumber}', function (Request $request, Response $r
             return $response->withStatus(401)->withJson(['error' => 'Token expired']);
         }
     }
-    return $response->withStatus(400)->withJson(['error' => 'Missing token']);
+    return $response->withStatus(400)->withJson(['error' => 'Missing token or phone number']);
 });
 
 $app->get('/[{path:.*}]', function (Request $request, Response $response, $args) {
