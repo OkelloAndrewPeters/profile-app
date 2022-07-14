@@ -1,4 +1,12 @@
-# profile-app
+# profile-app is login, register and view profile web app. the front end is built using vueJs and the backend is built using slim 3.0 framework.
+
+for the front-end directory run the two commands below
+npm install
+npm run dev
+
+for the backend run
+enter the src directory and run "composer upgrade"
+
 FRONT-END
 
 I implemented the front-end using vuejs 3.o as I was instructed, where I created a project using the npm init vue@3.0. I came up with three components/pages inside the subdirectory called pages which is located inside the src directory.
