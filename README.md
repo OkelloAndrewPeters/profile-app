@@ -5,7 +5,7 @@ npm install
 npm run dev
 
 for the backend run
-enter the src directory and run "composer upgrade"
+enter the src directory and run "composer upgrade" after putting the backend into the htdocs xamp folder.
 
 FRONT-END
 
@@ -67,5 +67,5 @@ If the token is expired, invalid, or missing, the user will just receive a messa
 If the token and phone number are correctly verified, the user is able to view the profile page.
 
 UNIT TESTS
-
+I used PHPUnit to carry out the unit tests for the API endpoints. Check the tests.php file
 
